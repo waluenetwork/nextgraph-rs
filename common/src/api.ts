@@ -26,12 +26,12 @@ export default api;
 export const NG_EU_BSP = "https://nextgraph.eu";
 export const NG_EU_BSP_REGISTER = import.meta.env.PROD
 ? "https://account.nextgraph.eu/#/create"
-: "http://account-dev.nextgraph.eu:5173/#/create";
+: "http://account.nextgraph.eu/#/create";
 
 export const NG_NET_BSP = "https://nextgraph.net";
 export const NG_NET_BSP_REGISTER = import.meta.env.PROD
 ? "https://account.nextgraph.net/#/create"
-: "http://account-dev.nextgraph.net:5173/#/create";
+: "http://account.nextgraph.net/#/create";
 
 export const APP_ACCOUNT_REGISTERED_SUFFIX = "/#/user/registered";
 export const APP_WALLET_CREATE_SUFFIX = "/#/wallet/create";

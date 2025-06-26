@@ -53,9 +53,9 @@ pub type ResultSend<T> = std::result::Result<T, Box<dyn std::error::Error + Send
 #[cfg(not(target_arch = "wasm32"))]
 pub fn spawn_and_log_error<F>(fut: F) -> task::JoinHandle<()>
 where
-    F: Future<Output = ResultSend<()>> + Send + 'static,
+    F: Future<Output = ResultSend<()>> + 'static,
 {
-    task::spawn(async move {
+    task::spawn_local(async move {
         if let Err(e) = fut.await {
             log_err!("{}", e)
         }

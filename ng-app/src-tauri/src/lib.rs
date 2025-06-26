@@ -303,6 +303,7 @@ async fn session_start(
     user: PubKey,
     _app: tauri::AppHandle,
 ) -> Result<SessionInfoString, String> {
+    println!("Merhaba, dünya!");
     let config = SessionConfig::new_save(&user, &wallet_name);
     nextgraph::local_broker::session_start(config)
         .await
@@ -793,6 +794,7 @@ async fn doc_create(
     destination: String,
     store_repo: Option<StoreRepo>
 ) -> Result<String, String> {
+    println!("doc_create GELDIGELDI");
     nextgraph::local_broker::doc_create_with_store_repo(session_id, crdt, class_name, destination, store_repo)
             .await
             .map_err(|e| e.to_string())
@@ -948,6 +950,7 @@ async fn user_connect(
 
 #[tauri::command(rename_all = "snake_case")]
 fn client_info_rust() -> Result<Value, String> {
+    println!("client_info_rust  GELDIGELDIGELDI ");
     Ok(ng_repo::os_info::get_os_info())
 }
 
@@ -962,7 +965,7 @@ pub struct AppBuilder {
 }
 
 #[cfg(debug_assertions)]
-const ALLOWED_BSP_DOMAINS: [&str; 2] = ["account-dev.nextgraph.eu", "account-dev.nextgraph.net"];
+const ALLOWED_BSP_DOMAINS: [&str; 2] = ["account.nextgraph.eu", "account.nextgraph.net"];
 #[cfg(not(debug_assertions))]
 const ALLOWED_BSP_DOMAINS: [&str; 2] = ["account.nextgraph.eu", "account.nextgraph.net"];
 

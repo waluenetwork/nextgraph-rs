@@ -25,7 +25,7 @@
     derived,
     cannot_load_offline,
   } from "../store";
-
+  console.log("lalalalalalalalallalalalalalalalalalalalallalalala")
   let display_login_create = !$has_wallets || !$active_wallet;
   let unsubscribe;
   onMount(() => {

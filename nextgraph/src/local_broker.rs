@@ -567,8 +567,7 @@ impl fmt::Debug for LocalBroker {
 }
 
 #[doc(hidden)]
-#[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
-#[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
+#[async_trait::async_trait(?Send)]
 pub trait ILocalBroker: Send + Sync + EActor {
     async fn deliver(&mut self, event: Event, overlay: OverlayId, user: UserId);
     async fn inbox(&mut self, user_id: UserId, msg: InboxMsg, from_queue: bool);
@@ -576,8 +575,7 @@ pub trait ILocalBroker: Send + Sync + EActor {
 }
 
 // used to deliver events to the verifier on Clients, or on Cores that have Verifiers attached.
-#[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
-#[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
+#[async_trait::async_trait(?Send)]
 impl ILocalBroker for LocalBroker {
     async fn deliver(&mut self, event: Event, overlay: OverlayId, user_id: UserId) {
         if let Some(session) = self.get_mut_session_for_user(&user_id) {
