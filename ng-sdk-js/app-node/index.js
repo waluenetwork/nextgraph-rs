@@ -23,17 +23,24 @@ global.WebSocket = WebSocket;
         
 
 const fs = require('fs');
-let buffer = fs.readFileSync("/home/nn/Downloads/wallet-bCHhOmlelVtZ60jjGu7m-YtzF4TfD5WyErAMnEDOn-kA.ngw");
+// let buffer = fs.readFileSync("/home/mustafa/WORKDIR/NEXTGRAPH/patronversion4/nextgraph-rs/nextgraph/examples/wallet.ngw");
+
+let buffer = fs.readFileSync("/home/mustafa/Downloads/wallet-LQlOq03_O-mLhStjYHfXV52WPBatYRChRri4KnDZB4sA.ngw");
 
 ng.wallet_read_file(buffer).then(async (wallet)=>{
     console.log("start");
     try {
+
+        //           
         //let wal = await ng.gen_wallet_for_test("rS6pZiroUZ5yjq9eraesDkpxWWOAoX_8QZ_5U9GXsOgA");
         //console.log(wal);
+        // let opened_wallet = await ng.wallet_open_with_mnemonic_words(wallet, [
+        //     "whisper", "bleak", "leisure", "arrange", "enjoy", "donate", "top", "digital", "access", "vessel", "fork", "robust" ],
+        //     [1, 2, 1, 2]);
 
         let opened_wallet = await ng.wallet_open_with_mnemonic_words(wallet, [
-            "mutual", "wife", "section", "actual", "spend", "illness", "save", "delay", "kiss", "crash", "baby", "degree" ],
-            [2, 3, 2, 3]);
+            "tilt", "soup", "pledge", "flat", "adult", "skirt", "blouse", "spot", "evoke", "truly", "oppose", "power" ],
+            [1, 2, 1, 2]);
 
         let user_id = opened_wallet.V0.personal_site;
         let user_id_string = opened_wallet.V0.personal_site_id;
@@ -42,6 +49,8 @@ ng.wallet_read_file(buffer).then(async (wallet)=>{
         console.log("wallet_name=", wallet_name)
 
         let _client = await ng.wallet_import(wallet, opened_wallet, true)
+
+        console.log("wallet_import=")
 
         let session = await ng.session_in_memory_start(wallet_name, user_id);
 
@@ -52,6 +61,10 @@ ng.wallet_read_file(buffer).then(async (wallet)=>{
         console.log("Session started. protected store ID = ", protected_repo_id)
 
         let info = await ng.client_info();
+
+
+        console.log("==== INFOOOOOOOO ====", info);
+
         let connection_status = await ng.user_connect(
             info,
             user_id_string
@@ -64,6 +77,7 @@ ng.wallet_read_file(buffer).then(async (wallet)=>{
         console.log(dump);
         console.log("==== END of DUMP ====");
 
+        
         // we create a new document in the protected store of the user.
         let nuri = await ng.doc_create(session_id, "Graph", "data:graph", "store", "protected", protected_repo_id );
         // once you have created a document, you can reuse its Nuri by entering it in the line below, remove the commenting, and comment out the above line

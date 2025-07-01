@@ -11,6 +11,9 @@ use core::fmt;
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{read, remove_file, write};
 use std::path::PathBuf;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use base64::Engine;
+use ng_repo::types::PubKey;
 
 use async_once_cell::OnceCell;
 use async_std::sync::{Arc, Condvar, Mutex, RwLock};
@@ -1573,17 +1576,19 @@ pub async fn wallet_create_v0(params: CreateWalletV0) -> Result<CreateWalletResu
     let sensitive_wallet: SensitiveWallet = (&intermediate).into();
 
     let _client = broker.wallet_was_opened(sensitive_wallet).await?;
-
+    println!("broker config: {:?}",broker.config);
     let session_config = SessionConfig::new_for_local_broker_config(
         &intermediate.user_privkey.to_pub(),
         &intermediate.wallet_name,
         &broker.config,
         intermediate.in_memory,
     )?;
+    println!("session_config: {:?}",session_config);
 
     let mut session = broker
         .session_start(session_config, Some(intermediate.user_privkey.clone()))
         .await?;
+    println!("session: {:?}",session);
 
     // let session = broker.opened_sessions_list[session_info.session_id as usize]
     //     .as_mut()
@@ -2333,7 +2338,10 @@ fn get_unix_time() -> f64 {
 pub async fn user_connect(
     user_id: &UserId,
 ) -> Result<Vec<(String, String, String, Option<String>, f64)>, NgError> {
+    print!("user_connect1");
     let client_info = get_client_info(ClientType::NativeService);
+    print!("user_connect2");
+    println!("user_connect2 info : {:?}", client_info);
     user_connect_with_device_info(client_info, &user_id, None).await
 }
 
@@ -2374,12 +2382,15 @@ pub async fn user_connect_with_device_info(
 ) -> Result<Vec<(String, String, String, Option<String>, f64)>, NgError> {
     //FIXME: release this write lock much sooner than at the end of the loop of all tries to connect to some servers ?
     // or maybe it is good to block as we dont want concurrent connection attempts potentially to the same server
+    println!("1");
     let mut local_broker = match LOCAL_BROKER.get() {
         None | Some(Err(_)) => return Err(NgError::LocalBrokerNotInitialized),
         Some(Ok(broker)) => broker.write().await,
     };
+    println!("2");
 
     local_broker.err_if_headless()?;
+    println!("3");
 
     let (client, sites, brokers, peer_key) = {
         let (wallet, session) = local_broker.get_wallet_and_session(original_user_id)?;
@@ -2393,12 +2404,18 @@ pub async fn user_connect_with_device_info(
         }
     };
 
+    println!("7");
     let mut result: Vec<(String, String, String, Option<String>, f64)> = Vec::new();
+    println!("8");
     let arc_cnx: Arc<Box<dyn IConnect>> = Arc::new(Box::new(ConnectionWebSocket {}));
+    println!("9");
 
     let client_priv = &client.sensitive_client_storage.priv_key;
+    println!("10");
     let client_name = &client.name;
+    println!("11");
     let auto_open = &client.auto_open;
+    println!("12");
     // log_info!(
     //     "XXXX {} name={:?} auto_open={:?} {:?}",
     //     client_id.to_string(),
@@ -2406,16 +2423,23 @@ pub async fn user_connect_with_device_info(
     //     auto_open,
     //     wallet
     // );
+    println!("13");
     for user in auto_open {
+    println!("14");
         let user_id = user.to_string();
+    println!("15");
         let peer_id = peer_key.to_pub();
+    println!("16");
         log_info!(
             "connecting with local peer_id {} for user {}",
             peer_id,
             user_id
         );
+    println!("17");
         let site = sites.get(&user_id);
+    println!("18");
         if site.is_none() {
+    println!("19");
             result.push((
                 user_id,
                 "".into(),
@@ -2423,14 +2447,22 @@ pub async fn user_connect_with_device_info(
                 Some("Site is missing".into()),
                 get_unix_time(),
             ));
+    println!("20");
             continue;
         }
+    println!("21");
         let site = site.unwrap();
+    println!("22");
         let user_priv = site.get_individual_user_priv_key().unwrap();
+    println!("23");
         let core = site.cores[0]; //TODO: cycle the other cores if failure to connect (failover)
+    println!("24");
         let server_key = core.0;
+    println!("25");
         let broker = brokers.get(&core.0.to_string());
+    println!("26");
         if broker.is_none() {
+    println!("27");
             result.push((
                 user_id,
                 core.0.to_string(),
@@ -2438,22 +2470,55 @@ pub async fn user_connect_with_device_info(
                 Some("Broker is missing".into()),
                 get_unix_time(),
             ));
+    println!("28");
             continue;
         }
+    println!("29");
         let brokers = broker.unwrap();
+    println!("30");
         let mut tried: Option<(String, String, String, Option<String>, f64)> = None;
+    println!("31");
         //TODO: on tauri (or forward in local broker, or CLI), prefer a Public to a Domain. Domain always comes first though, so we need to reorder the list
         //TODO: use site.bootstraps to order the list of brokerInfo.
         local_broker.stop_pump().await;
+    println!("32");
         for broker_info in brokers {
+    println!("33");
             match broker_info {
                 BrokerInfoV0::ServerV0(server) => {
+    println!("34");
                     let url = server.get_ws_url(&location).await;
+    println!("35");
                     log_debug!("URL {:?}", url);
                     //Option<(String, Vec<BindAddress>)>
                     if url.is_some() {
+    println!("36");
                         let url = url.unwrap();
+    println!("37");
                         if url.1.is_empty() {
+    println!("38");
+    println!("38url.0.clone(): {:?}",url.0.clone());
+    // println!("38arc_cnx.clone(): {:?}",arc_cnx.clone());
+    println!("38apeer_key.clone(): {:?}",peer_key.clone());
+    println!("38apeer_id: {:?}",peer_id.to_string());
+    println!("38aserver_keyto_string: {:?}",server_key.to_string());
+    println!("38aserver_key: {:?}",server_key.to_hash_string());
+    println!("38aurl.0.clone(): {:?}",url.0.clone());
+    println!("38aclient_name.clone(): {:?}",client_name.clone());
+    println!("38auser_priv.clone(): {:?}",user_priv.clone());
+    println!("38aclient_priv.clone(): {:?}",client_priv.clone());
+    println!("38ainfo.clone(): {:?}",info.clone());
+    println!("38aSome(core.1): {:?}",Some(core.1));
+    let server_key_str = "_WFagTf0unHzR2kj3vLvvLakBNX7vel_Rus_GEDWT-oA";
+    // let server_key_bytes = URL_SAFE_NO_PAD
+    // .decode(server_key_str)
+    // .expect("Base64 decode failed");
+
+    // let server_key_m = PubKey(server_key_bytes);
+    let server_key_m: PubKey = (server_key_str).try_into().unwrap();
+    println!("38aserver_key_m: {:?}",server_key_m.to_hash_string());
+    println!("38aserver_key_m.to_string(): {:?}",server_key_m.to_string());
+
                             // TODO deal with Box(Dyn)Public -> tunnel, and on tauri/forward/CLIs, deal with all Box -> direct connections (when url.1.len is > 0)
                             let res = BROKER
                                 .write()
@@ -2462,7 +2527,7 @@ pub async fn user_connect_with_device_info(
                                     arc_cnx.clone(),
                                     peer_key.clone(),
                                     peer_id,
-                                    server_key,
+                                    server_key_m,
                                     StartConfig::Client(ClientConfig {
                                         url: url.0.clone(),
                                         name: client_name.clone(),
@@ -2473,7 +2538,9 @@ pub async fn user_connect_with_device_info(
                                     }),
                                 )
                                 .await;
+    println!("39 : {:?}", res);
                             log_debug!("broker.connect : {:?}", res);
+    println!("40");
 
                             tried = Some((
                                 user_id.clone(),
@@ -2485,37 +2552,57 @@ pub async fn user_connect_with_device_info(
                                 },
                                 get_unix_time(),
                             ));
+    println!("41");
                         }
+    println!("42");
                         if tried.is_some() && tried.as_ref().unwrap().3.is_none() {
+    println!("43");
                             let res = {
                                 let session = local_broker.get_session_mut(original_user_id)?;
                                 session.verifier.connection_opened(server_key).await
                             };
+    println!("44");
                             if res.is_err() {
+    println!("45");
                                 let e = res.unwrap_err();
+    println!("46");
                                 log_err!("got error while processing opened connection {:?}", e);
+    println!("47");
                                 Broker::close_all_connections().await;
+    println!("48");
                                 tried.as_mut().unwrap().3 = Some(e.to_string());
+    println!("49");
                             } else {
+    println!("50");
                                 local_broker.start_pump().await;
+    println!("51");
 
                                 // try to pop inbox msg
                                 let broker = BROKER.read().await;
+    println!("52");
                                 broker
                                     .send_client_event(&Some(*user), &Some(server_key), ClientEvent::InboxPopRequest)
                                     .await?;
+    println!("53");
                             }
+    println!("54");
                             break;
                         } else {
+    println!("55");
                             log_debug!("Failed connection {:?}", tried);
                         }
+    println!("56");
                     }
+    println!("57");
                 }
                 // Core information is discarded
                 _ => {}
             }
+    println!("58");
         }
+    println!("59");
         if tried.is_none() {
+    println!("60");
             tried = Some((
                 user_id,
                 core.0.to_string(),
@@ -2523,10 +2610,16 @@ pub async fn user_connect_with_device_info(
                 Some("No broker found".into()),
                 get_unix_time(),
             ));
+    println!("61");
         }
+    println!("62");
         result.push(tried.unwrap());
+    println!("63");
     }
-
+    print!("anananan");
+    print!("anananan");
+    print!("anananan");
+    print!("anananan");
     Ok(result)
 }
 

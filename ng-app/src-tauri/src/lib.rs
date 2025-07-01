@@ -43,11 +43,13 @@ pub type SetupHook = Box<dyn FnOnce(&mut App) -> Result<(), Box<dyn std::error::
 
 #[tauri::command(rename_all = "snake_case")]
 async fn privkey_to_string(privkey: PrivKey) -> Result<String, String> {
+    println!("privkey_to_string");
     Ok(format!("{privkey}"))
 }
 
 #[tauri::command(rename_all = "snake_case")]
 async fn locales() -> Result<Vec<String>, ()> {
+    println!("locales");
     Ok(get_locales()
         .filter_map(|lang| {
             if lang == "C" || lang == "c" {
@@ -69,6 +71,7 @@ async fn locales() -> Result<Vec<String>, ()> {
 
 #[tauri::command(rename_all = "snake_case")]
 async fn test(app: tauri::AppHandle) -> Result<(), ()> {
+    println!("test");
     let path = app
         .path()
         .resolve("", BaseDirectory::AppLocalData)
@@ -89,6 +92,7 @@ async fn test(app: tauri::AppHandle) -> Result<(), ()> {
 
 #[tauri::command(rename_all = "snake_case")]
 async fn wallet_gen_shuffle_for_pazzle_opening(pazzle_length: u8) -> Result<ShuffledPazzle, ()> {
+    println!("wallet_gen_shuffle_for_pazzle_opening");
     // log_debug!(
     //     "wallet_gen_shuffle_for_pazzle_opening from rust {}",
     //     pazzle_length
@@ -98,6 +102,7 @@ async fn wallet_gen_shuffle_for_pazzle_opening(pazzle_length: u8) -> Result<Shuf
 
 #[tauri::command(rename_all = "snake_case")]
 async fn wallet_gen_shuffle_for_pin() -> Result<Vec<u8>, ()> {
+    println!("wallet_gen_shuffle_for_pin");
     //log_debug!("wallet_gen_shuffle_for_pin from rust");
     Ok(gen_shuffle_for_pin())
 }
@@ -109,6 +114,7 @@ async fn wallet_open_with_pazzle(
     pin: [u8; 4],
     _app: tauri::AppHandle,
 ) -> Result<SensitiveWallet, String> {
+    println!("wallet_open_with_pazzle");
     //log_debug!("wallet_open_with_pazzle from rust {:?}", pazzle);
     let wallet = nextgraph::local_broker::wallet_open_with_pazzle(&wallet, pazzle, pin)
         .map_err(|e| e.to_string())?;
@@ -122,6 +128,7 @@ async fn wallet_open_with_mnemonic(
     pin: [u8; 4],
     _app: tauri::AppHandle,
 ) -> Result<SensitiveWallet, String> {
+    println!("wallet_open_with_mnemonic");
     let wallet =
         ng_wallet::open_wallet_with_mnemonic(&wallet, mnemonic, pin).map_err(|e| e.to_string())?;
     Ok(wallet)
@@ -134,6 +141,7 @@ async fn wallet_open_with_mnemonic_words(
     pin: [u8; 4],
     _app: tauri::AppHandle,
 ) -> Result<SensitiveWallet, String> {
+    println!("wallet_open_with_mnemonic_words");
     let wallet =
         nextgraph::local_broker::wallet_open_with_mnemonic_words(&wallet, &mnemonic_words, pin)
             .map_err(|e| e.to_string())?;
@@ -142,6 +150,7 @@ async fn wallet_open_with_mnemonic_words(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn wallet_get_file(wallet_name: String, app: tauri::AppHandle) -> Result<(), String> {
+    println!("wallet_get_file");
     let ser = nextgraph::local_broker::wallet_get_file(&wallet_name)
         .await
         .map_err(|e| e.to_string())?;
@@ -163,11 +172,12 @@ async fn wallet_create(
     mut params: CreateWalletV0,
     app: tauri::AppHandle,
 ) -> Result<CreateWalletResultV0, String> {
+    println!("wallet_create");
     //log_debug!("wallet_create from rust {:?}", params);
     params.result_with_wallet_file = !params.local_save;
     let local_save = params.local_save;
     let pdf = params.pdf;
-    let mut cwr = nextgraph::local_broker::wallet_create_v0(params)
+    let mut cwr: CreateWalletResultV0 = nextgraph::local_broker::wallet_create_v0(params)
         .await
         .map_err(|e| e.to_string())?;
     if !local_save {
@@ -201,6 +211,7 @@ async fn wallet_create(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn wallet_read_file(file: Vec<u8>, _app: tauri::AppHandle) -> Result<Wallet, String> {
+    println!("wallet_read_file");
     nextgraph::local_broker::wallet_read_file(file)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -211,6 +222,7 @@ async fn wallet_was_opened(
     opened_wallet: SensitiveWallet,
     _app: tauri::AppHandle,
 ) -> Result<ClientV0, String> {
+    println!("wallet_was_opened");
     nextgraph::local_broker::wallet_was_opened(opened_wallet)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -223,6 +235,7 @@ async fn wallet_import(
     in_memory: bool,
     _app: tauri::AppHandle,
 ) -> Result<ClientV0, String> {
+    println!("wallet_import");
     nextgraph::local_broker::wallet_import(encrypted_wallet, opened_wallet, in_memory)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -234,6 +247,7 @@ async fn wallet_export_rendezvous(
     code: String,
     _app: tauri::AppHandle,
 ) -> Result<(), String> {
+    println!("wallet_export_rendezvous");
     nextgraph::local_broker::wallet_export_rendezvous(session_id, code)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -245,6 +259,7 @@ async fn wallet_export_get_qrcode(
     size: u32,
     _app: tauri::AppHandle,
 ) -> Result<String, String> {
+    println!("wallet_export_get_qrcode");
     nextgraph::local_broker::wallet_export_get_qrcode(session_id, size)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -255,6 +270,7 @@ async fn wallet_export_get_textcode(
     session_id: u64,
     _app: tauri::AppHandle,
 ) -> Result<String, String> {
+    println!("wallet_export_get_textcode");
     nextgraph::local_broker::wallet_export_get_textcode(session_id)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -265,6 +281,7 @@ async fn wallet_import_rendezvous(
     size: u32,
     _app: tauri::AppHandle,
 ) -> Result<(String, String), String> {
+    println!("wallet_import_rendezvous");
     nextgraph::local_broker::wallet_import_rendezvous(size)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -272,6 +289,7 @@ async fn wallet_import_rendezvous(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn wallet_import_from_code(code: String, _app: tauri::AppHandle) -> Result<Wallet, String> {
+    println!("wallet_import_from_code");
     nextgraph::local_broker::wallet_import_from_code(code)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -281,6 +299,7 @@ async fn wallet_import_from_code(code: String, _app: tauri::AppHandle) -> Result
 async fn get_wallets(
     app: tauri::AppHandle,
 ) -> Result<Option<HashMap<String, LocalWalletStorageV0>>, String> {
+    println!("get_wallets");
     let path = app
         .path()
         .resolve("", BaseDirectory::AppLocalData)
@@ -303,6 +322,7 @@ async fn session_start(
     user: PubKey,
     _app: tauri::AppHandle,
 ) -> Result<SessionInfoString, String> {
+    println!("session_start");
     println!("Merhaba, dünya!");
     let config = SessionConfig::new_save(&user, &wallet_name);
     nextgraph::local_broker::session_start(config)
@@ -318,6 +338,7 @@ async fn session_start_remote(
     peer_id: Option<PubKey>,
     _app: tauri::AppHandle,
 ) -> Result<SessionInfoString, String> {
+    println!("session_start_remote");
     let config = SessionConfig::new_remote(&user, &wallet_name, peer_id);
     nextgraph::local_broker::session_start(config)
         .await
@@ -327,6 +348,7 @@ async fn session_start_remote(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn encode_create_account(payload: CreateAccountBSP) -> Result<String, ()> {
+    println!("encode_create_account");
     //log_debug!("{:?}", payload);
     payload.encode().ok_or(())
 }
@@ -338,6 +360,7 @@ async fn open_window(
     title: String,
     app: tauri::AppHandle,
 ) -> Result<(), ()> {
+    println!("open_window");
     log_debug!("open window url {:?}", url);
     let _already_exists = app.get_window(&label);
     #[cfg(desktop)]
@@ -357,6 +380,7 @@ async fn open_window(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn decode_invitation(invite: String) -> Option<Invitation> {
+    println!("decode_invitation");
     decode_invitation_string(invite)
 }
 
@@ -364,6 +388,7 @@ async fn decode_invitation(invite: String) -> Option<Invitation> {
 async fn retrieve_ng_bootstrap(
     location: String,
 ) -> Result<ng_net::types::LocalBootstrapInfo, String> {
+    println!("retrieve_ng_bootstrap");
     ng_net::utils::retrieve_ng_bootstrap(&location)
         .await
         .ok_or("cannot retrieve bootstrap".to_string())
@@ -377,6 +402,7 @@ async fn file_get(
     branch_nuri: String,
     app: tauri::AppHandle,
 ) -> Result<(), String> {
+    println!("file_get");
     let branch_nuri =
         NuriV0::new_from(&branch_nuri).map_err(|e| format!("branch_nuri: {}", e.to_string()))?;
     let mut nuri = NuriV0::new_from_obj_ref(&reference);
@@ -394,6 +420,7 @@ async fn app_request_stream(
     stream_id: &str,
     app: tauri::AppHandle,
 ) -> Result<(), String> {
+    println!("app_request_stream");
     //log_debug!("app request stream {} {:?}", stream_id, request);
     let main_window = app.get_window("main").unwrap();
 
@@ -414,6 +441,7 @@ async fn app_request_stream(
         stream_id: String,
         main_window: tauri::Window,
     ) -> ResultSend<()> {
+        println!("inner_task");
         while let Some(app_response) = reader.next().await {
             let app_response = nextgraph::verifier::prepare_app_response_for_js(app_response)?;
             main_window.emit(&stream_id, app_response).unwrap();
@@ -440,6 +468,7 @@ async fn discrete_update(
     crdt: String,
     nuri: String,
 ) -> Result<(), String> {
+    println!("discrete_update");
     let nuri = NuriV0::new_from(&nuri).map_err(|e| e.to_string())?;
 
     let request = AppRequest::V0(AppRequestV0 {
@@ -470,6 +499,7 @@ async fn file_save_to_downloads(
     branch_nuri: String,
     app: tauri::AppHandle,
 ) -> Result<(), String> {
+    println!("file_save_to_downloads");
     let branch_nuri =
         NuriV0::new_from(&branch_nuri).map_err(|e| format!("branch_nuri: {}", e.to_string()))?;
     let mut nuri = NuriV0::new_from_obj_ref(&reference);
@@ -527,6 +557,7 @@ async fn file_save_to_downloads(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn doc_fetch_private_subscribe() -> Result<AppRequest, String> {
+    println!("doc_fetch_private_subscribe");
     let request = AppRequest::new(
         AppRequestCommandV0::Fetch(AppFetchContentV0::get_or_subscribe(true)),
         NuriV0::new_private_store_target(),
@@ -537,11 +568,13 @@ async fn doc_fetch_private_subscribe() -> Result<AppRequest, String> {
 
 #[tauri::command(rename_all = "snake_case")]
 async fn doc_fetch_repo_subscribe(repo_o: String) -> Result<AppRequest, String> {
+    println!("doc_fetch_repo_subscribe");
     AppRequest::doc_fetch_repo_subscribe(repo_o).map_err(|e| e.to_string())
 }
 
 #[tauri::command(rename_all = "snake_case")]
 async fn branch_history(session_id: u64, nuri: String) -> Result<AppHistoryJs, String> {
+    println!("branch_history");
     let request = AppRequest::V0(AppRequestV0 {
         command: AppRequestCommandV0::new_history(),
         nuri: NuriV0::new_from(&nuri).map_err(|e| e.to_string())?,
@@ -568,6 +601,7 @@ async fn update_header(
     title: Option<String>,
     about: Option<String>,
 ) -> Result<(), String> {
+    println!("update_header");
     let nuri = NuriV0::new_from(&nuri).map_err(|e| e.to_string())?;
 
     let request = AppRequest::V0(AppRequestV0 {
@@ -589,6 +623,7 @@ async fn update_header(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn fetch_header(session_id: u64, nuri: String) -> Result<AppHeader, String> {
+    println!("fetch_header");
     let nuri = NuriV0::new_from(&nuri).map_err(|e| e.to_string())?;
 
     let request = AppRequest::V0(AppRequestV0 {
@@ -614,6 +649,7 @@ async fn sparql_update(
     sparql: String,
     nuri: Option<String>,
 ) -> Result<Vec<String>, String> {
+    println!("sparql_update");
     let (nuri, base) = if let Some(n) = nuri {
         let nuri = NuriV0::new_from(&n).map_err(|e| e.to_string())?;
         let b = nuri.repo();
@@ -646,6 +682,7 @@ async fn sparql_query(
     base: Option<String>,
     nuri: Option<String>,
 ) -> Result<Value, String> {
+    println!("sparql_query");
     let nuri = if nuri.is_some() {
         NuriV0::new_from(&nuri.unwrap()).map_err(|e| e.to_string())?
     } else {
@@ -691,6 +728,7 @@ async fn sparql_query(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn app_request(request: AppRequest) -> Result<AppResponse, String> {
+    println!("app_request");
     //log_debug!("app request {:?}", request);
 
     nextgraph::local_broker::app_request(request)
@@ -703,6 +741,7 @@ async fn signature_status(
     session_id: u64,
     nuri: Option<String>,
 ) -> Result<Vec<(String, Option<String>, bool)>, String> {
+    println!("signature_status");
     let nuri = if nuri.is_some() {
         NuriV0::new_from(&nuri.unwrap()).map_err(|e| e.to_string())?
     } else {
@@ -730,6 +769,7 @@ async fn signature_status(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn signed_snapshot_request(session_id: u64, nuri: Option<String>) -> Result<bool, String> {
+    println!("signed_snapshot_request");
     let nuri = if nuri.is_some() {
         NuriV0::new_from(&nuri.unwrap()).map_err(|e| e.to_string())?
     } else {
@@ -759,6 +799,7 @@ async fn signed_snapshot_request(session_id: u64, nuri: Option<String>) -> Resul
 
 #[tauri::command(rename_all = "snake_case")]
 async fn signature_request(session_id: u64, nuri: Option<String>) -> Result<bool, String> {
+    println!("signature_request");
     let nuri = if nuri.is_some() {
         NuriV0::new_from(&nuri.unwrap()).map_err(|e| e.to_string())?
     } else {
@@ -794,6 +835,7 @@ async fn doc_create(
     destination: String,
     store_repo: Option<StoreRepo>
 ) -> Result<String, String> {
+    println!("doc_create");
     println!("doc_create GELDIGELDI");
     nextgraph::local_broker::doc_create_with_store_repo(session_id, crdt, class_name, destination, store_repo)
             .await
@@ -807,6 +849,7 @@ async fn app_request_with_nuri_command(
     session_id: u64,
     payload: Option<AppRequestPayloadV0>,
 ) -> Result<AppResponse, String> {
+    println!("app_request_with_nuri_command");
     let nuri = NuriV0::new_from(&nuri).map_err(|e| e.to_string())?;
 
     let payload = payload.map(|p| AppRequestPayload::V0(p));
@@ -829,6 +872,7 @@ async fn upload_chunk(
     nuri: String,
     _app: tauri::AppHandle,
 ) -> Result<AppResponse, String> {
+    println!("upload_chunk");
     //log_debug!("upload_chunk {:?}", chunk);
 
     let mut request = AppRequest::new(
@@ -847,6 +891,7 @@ async fn upload_chunk(
 
 #[tauri::command(rename_all = "snake_case")]
 async fn cancel_stream(stream_id: &str) -> Result<(), String> {
+    println!("cancel_stream");
     //log_debug!("cancel stream {}", stream_id);
     Ok(
         nextgraph::local_broker::tauri_stream_cancel(stream_id.to_string())
@@ -857,6 +902,7 @@ async fn cancel_stream(stream_id: &str) -> Result<(), String> {
 
 #[tauri::command(rename_all = "snake_case")]
 async fn disconnections_subscribe(app: tauri::AppHandle) -> Result<(), String> {
+    println!("disconnections_subscribe");
     let path = app
         .path()
         .resolve("", BaseDirectory::AppLocalData)
@@ -889,6 +935,7 @@ async fn disconnections_subscribe(app: tauri::AppHandle) -> Result<(), String> {
 
 #[tauri::command(rename_all = "snake_case")]
 async fn session_stop(user_id: String) -> Result<(), String> {
+    println!("session_stop");
     let user_id = decode_key(&user_id).map_err(|_| "Invalid user_id")?;
     nextgraph::local_broker::session_stop(&user_id)
         .await
@@ -897,6 +944,7 @@ async fn session_stop(user_id: String) -> Result<(), String> {
 
 #[tauri::command(rename_all = "snake_case")]
 async fn user_disconnect(user_id: String) -> Result<(), String> {
+    println!("user_disconnect");
     let user_id = decode_key(&user_id).map_err(|_| "Invalid user_id")?;
     nextgraph::local_broker::user_disconnect(&user_id)
         .await
@@ -905,6 +953,7 @@ async fn user_disconnect(user_id: String) -> Result<(), String> {
 
 #[tauri::command(rename_all = "snake_case")]
 async fn wallet_close(wallet_name: String) -> Result<(), String> {
+    println!("wallet_close");
     nextgraph::local_broker::wallet_close(&wallet_name)
         .await
         .map_err(|e: NgError| e.to_string())
@@ -924,6 +973,7 @@ async fn user_connect(
     user_id: String,
     _location: Option<String>,
 ) -> Result<HashMap<String, ConnectionInfo>, String> {
+    println!("user_connect");
     let user_id = decode_key(&user_id).map_err(|_| "Invalid user_id")?;
     let mut opened_connections: HashMap<String, ConnectionInfo> = HashMap::new();
 
@@ -950,12 +1000,14 @@ async fn user_connect(
 
 #[tauri::command(rename_all = "snake_case")]
 fn client_info_rust() -> Result<Value, String> {
+    println!("client_info_rust");
     println!("client_info_rust  GELDIGELDIGELDI ");
     Ok(ng_repo::os_info::get_os_info())
 }
 
 #[tauri::command(rename_all = "snake_case")]
 fn get_device_name() -> Result<String, String> {
+    println!("get_device_name");
     Ok(nextgraph::get_device_name())
 }
 
@@ -984,6 +1036,7 @@ impl AppBuilder {
     }
 
     pub fn run(self) {
+        println!("run");
         let setup = self.setup;
 
         #[allow(unused_mut)]

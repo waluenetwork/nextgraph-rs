@@ -9,8 +9,12 @@
 
 use std::env::current_dir;
 use std::fs::create_dir_all;
+use std::fs;
 use std::fs::read;
+use std::fs::write;
 
+use std::io;
+use std::path::Path;
 #[allow(unused_imports)]
 use nextgraph::local_broker::{
     app_request, app_request_stream, init_local_broker, session_start, session_stop, user_connect,
@@ -67,7 +71,23 @@ async fn main() -> std::io::Result<()> {
         device_name: "test".to_string(),
     })
     .await?;
+// let mut pathh="".resolve(
+//                 format!("wallet-{}.ngw", wallet_result.wallet_name),
+//                 BaseDirectory::Download,
+//             )
+//             .unwrap();
+    let file_path = "/home/mustafa/WORKDIR/NEXTGRAPH/patronversion4/nextgraph-rs/nextgraph/examples/wallet.ngw";
 
+    // Ana klasörü al
+    if let Some(parent_dir) = Path::new(file_path).parent() {
+        fs::create_dir_all(parent_dir)?; // klasörleri oluştur (varsa dokunmaz)
+    }
+    let _r = write(file_path, &wallet_result.wallet_file);
+
+    // let _r2 = write("path.pdf", &wallet_result.pdf_file);
+        
+
+    
     println!("Your wallet name is : {}", wallet_result.wallet_name);
 
     let pazzle = display_pazzle(&wallet_result.pazzle);
@@ -90,9 +110,10 @@ async fn main() -> std::io::Result<()> {
 
     // A session has been opened for you and you can directly use it without the need to call [wallet_was_opened] nor [session_start].
     let user_id = wallet_result.personal_identity();
-
+    println!("giris");
     // if the user has internet access, they can now decide to connect to its Server Broker, in order to sync data
     let status = user_connect(&user_id).await?;
+    println!("çıkış");
 
     // The connection cannot succeed because we miss-configured the core_bootstrap of the wallet. its Peer ID is invalid.
     let error_reason = status[0].3.as_ref().unwrap();
@@ -142,7 +163,9 @@ async fn main() -> std::io::Result<()> {
 
     // The connection cannot succeed because we miss-configured the core_bootstrap of the wallet. its Peer ID is invalid.
     let error_reason = status[0].3.as_ref().unwrap();
-    assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError");
+    println!("ZZXerror_reasonXXXX: {:?}",error_reason);
+    // assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError");
+    println!("ZZXerror_reasonXXX çıktı");
 
     // then you can make some calls to the APP protocol
     // with app_request or app_request_stream

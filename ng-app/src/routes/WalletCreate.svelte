@@ -443,6 +443,9 @@
         if (local_url) redirect_url = local_url + APP_WALLET_CREATE_SUFFIX;
       }
 
+      console.log("redirect_url: ",redirect_url);
+      
+
       let create = {
         V0: {
           redirect_url,
@@ -1095,7 +1098,7 @@
               </button>
             </div>
 
-            <!-- <div class="row mt-5">
+            <div class="row mt-5">
               <button
                 on:click|once={selectNET}
                 class="choice-button text-primary-700 bg-primary-100 hover:bg-primary-100/90 focus:ring-4 focus:ring-primary-100/50 font-medium rounded-lg text-lg px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-primary-100/55 mb-2"
@@ -1117,7 +1120,7 @@
                 </svg>
                 {$t("pages.wallet_create.for_rest")}
               </button>
-            </div> -->
+            </div>
           {/if}
 
           <div class="row mt-5">

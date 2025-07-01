@@ -3242,6 +3242,7 @@ dependencies = [
  "async-once-cell",
  "async-std",
  "async-trait",
+ "base64 0.21.2",
  "base64-url",
  "futures",
  "lazy_static",
