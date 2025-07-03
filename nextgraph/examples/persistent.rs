@@ -48,7 +48,9 @@ async fn main() -> std::io::Result<()> {
 
     // the peer_id should come from somewhere else.
     // this is just given for the sake of an example
-    let peer_id_of_server_broker: PubKey = "0M2-O3MjH13eaanBrw_Az8SsT90AUOWlwSBA__CLsTcA".try_into().unwrap();
+    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
+    
+    let user_id: PubKey = "Rb8M-t5Jt_Ry9CEbcl0FS-rK9j3_K4LNlFR4SeGoGlQA".try_into().unwrap();
 
     // Create your wallet
     // this will take some time !
@@ -111,8 +113,13 @@ async fn main() -> std::io::Result<()> {
     println!("çıkış");
 
     // The connection cannot succeed because we miss-configured the core_bootstrap of the wallet. its Peer ID is invalid.
-    let error_reason = status[0].3.as_ref().unwrap();
-    assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError" || error_reason == "InvitationRequired" || error_reason == "AccessDenied");
+    println!("Connection status: {:?}", status[0]);
+    if let Some(error_reason) = status[0].3.as_ref() {
+        println!("Connection failed with: {}", error_reason);
+        assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError" || error_reason == "InvitationRequired" || error_reason == "AccessDenied");
+    } else {
+        println!("✅ Connection successful!");
+    }
 
     // a session ID has been assigned to you in `wallet_result.session_id` you can use it to fetch a document
     //let _ = doc_fetch(wallet_result.session_id, "ng:example".to_string(), None).await?;

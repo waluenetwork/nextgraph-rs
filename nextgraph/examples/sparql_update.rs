@@ -14,7 +14,7 @@ use async_std::stream::StreamExt;
 use nextgraph::local_broker::{
     app_request, app_request_stream, doc_fetch_repo_subscribe, doc_sparql_update,
     init_local_broker, session_start, session_stop, user_connect, user_disconnect, wallet_close,
-    wallet_create_v0, wallet_get, wallet_get_file, wallet_import, wallet_open_with_mnemonic_words,
+    wallet_create_v0, wallet_get, wallet_get_file, wallet_import, wallet_open_with_pazzle,
     wallet_read_file, wallet_was_opened, LocalBrokerConfig, SessionConfig,
 };
 use nextgraph::net::types::BootstrapContentV0;
@@ -34,22 +34,9 @@ async fn main() -> std::io::Result<()> {
 
     let wallet = wallet_read_file(wallet_file).await?;
 
-    let mnemonic_words = vec![
-        "tribe".to_string(),
-        "outdoor".to_string(),
-        "illegal".to_string(),
-        "material".to_string(),
-        "endorse".to_string(),
-        "direct".to_string(),
-        "cream".to_string(),
-        "estate".to_string(),
-        "act".to_string(),
-        "segment".to_string(),
-        "valley".to_string(),
-        "chimney".to_string(),
-    ];
+    let pazzle = vec![7, 17, 102, 43, 126, 84, 135, 56, 64];
 
-    let opened_wallet = wallet_open_with_mnemonic_words(&wallet, &mnemonic_words, [2, 3, 2, 3])?;
+    let opened_wallet = wallet_open_with_pazzle(&wallet, pazzle, [1, 2, 1, 2])?;
 
     let user_id = opened_wallet.personal_identity();
     let wallet_name = opened_wallet.name();

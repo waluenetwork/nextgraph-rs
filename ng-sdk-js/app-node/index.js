@@ -38,9 +38,7 @@ ng.wallet_read_file(buffer).then(async (wallet)=>{
         //     "whisper", "bleak", "leisure", "arrange", "enjoy", "donate", "top", "digital", "access", "vessel", "fork", "robust" ],
         //     [1, 2, 1, 2]);
 
-        let opened_wallet = await ng.wallet_open_with_mnemonic_words(wallet, [
-            "tribe", "outdoor", "illegal", "material", "endorse", "direct", "cream", "estate", "act", "segment", "valley", "chimney" ],
-            [2, 3, 2, 3]);
+        let opened_wallet = await ng.wallet_open_with_pazzle(wallet, [7, 17, 102, 43, 126, 84, 135, 56, 64], [1, 2, 1, 2]);
 
         let user_id = opened_wallet.V0.personal_site;
         let user_id_string = opened_wallet.V0.personal_site_id;

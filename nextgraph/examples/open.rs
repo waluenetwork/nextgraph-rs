@@ -33,11 +33,12 @@ async fn main() -> std::io::Result<()> {
     }))
     .await;
 
-    let wallet_name = "kbpDosKhaNMA0qLVG46rLr2lw4WooSP2AEa3Gio5kMQA".to_string();
+    let user_id: PubKey = "GCY9-5bPrgpXaUySc-vNxHc58Qp6GsCnXZuR7AyNWJ4A".try_into().unwrap();
+    let wallet_name = "UU0TQrFHowwgU-61YfTJnr484V5w0jwL9tSEz3pmtNoA".to_string();
 
     // the peer_id should come from somewhere else.
     // this is just given for the sake of an example
-    let peer_id_of_server_broker: PubKey = "0M2-O3MjH13eaanBrw_Az8SsT90AUOWlwSBA__CLsTcA".try_into().unwrap();
+    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
 
     // as we have previously saved the wallet,
     // we can retrieve it, display the security phrase and image to the user, ask for the pazzle or mnemonic, and then open the wallet
@@ -48,11 +49,11 @@ async fn main() -> std::io::Result<()> {
     // now let's open the wallet, by providing the pazzle and PIN code
     let opened_wallet = wallet_open_with_pazzle(
         &wallet,
-        vec![108, 141, 32, 89, 17, 122, 5, 59, 70],
+        vec![7, 17, 102, 43, 126, 84, 135, 56, 64],
         [1, 2, 1, 2],
     )?;
 
-    let user_id = opened_wallet.personal_identity();
+    // let user_id = opened_wallet.personal_identity(); // Use generated user instead
 
     // once the wallet is opened, we notify the LocalBroker that we have opened it.
     let _client = wallet_was_opened(opened_wallet).await?;
