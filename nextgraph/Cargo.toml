@@ -33,6 +33,7 @@ whoami = "1.5.1"
 qrcode = { version = "0.14.1", default-features = false, features = ["svg"] }
 svg2pdf = { version = "0.11.0", default-features = false }
 pdf-writer = "0.10.0"
+clap = { version = "4.0", features = ["derive", "env"] }
 ng-repo = { path = "../ng-repo", version = "0.1.1-alpha.2" }
 ng-net = { path = "../ng-net", version = "0.1.1-alpha.2" }
 ng-wallet = { path = "../ng-wallet", version = "0.1.1-alpha.2" }

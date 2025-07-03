@@ -8,6 +8,7 @@
 // according to those terms.
 
 use std::fs::read;
+use clap::Parser;
 
 use async_std::stream::StreamExt;
 #[allow(unused_imports)]
@@ -24,13 +25,25 @@ use nextgraph::repo::types::PubKey;
 use nextgraph::wallet::types::CreateWalletV0;
 use nextgraph::wallet::{display_mnemonic, emojis::display_pazzle};
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, env = "NG_WALLET_FILE", default_value = "wallet.ngw")]
+    wallet_file: String,
+}
+
 #[async_std::main]
 async fn main() -> std::io::Result<()> {
+    let args = Args::parse();
+
     // initialize the local_broker with in-memory config.
     // all sessions will be lost when the program exits
     init_local_broker(Box::new(|| LocalBrokerConfig::InMemory)).await;
 
-    let wallet_file = read("wallet.ngw").expect("read wallet file");
+    let wallet_file = read(&args.wallet_file)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::NotFound, format!("Cannot read wallet file {}: {}", args.wallet_file, e)))?;
+
+    println!("Using wallet file: {}", args.wallet_file);
 
     let wallet = wallet_read_file(wallet_file).await?;
 

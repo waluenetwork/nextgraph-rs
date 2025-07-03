@@ -12,6 +12,7 @@ use std::fs::create_dir_all;
 use std::fs;
 use std::fs::read;
 use std::fs::write;
+use clap::Parser;
 
 use std::io;
 use std::path::Path;
@@ -27,8 +28,23 @@ use nextgraph::repo::types::PubKey;
 use nextgraph::wallet::types::CreateWalletV0;
 use nextgraph::wallet::{display_mnemonic, emojis::display_pazzle};
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, env = "NG_PEER_ID", default_value = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA")]
+    peer_id: String,
+
+    #[arg(short, long, env = "NG_USER_ID", default_value = "4yzJccQX0G6dyNrh7vGiiwD6FeOPCZBNy2ChFJsYe8oA")]
+    user_id: String,
+
+    #[arg(short, long, env = "NG_WALLET_NAME", default_value = "existing_user_wallet")]
+    wallet_name: String,
+}
+
 #[async_std::main]
 async fn main() -> std::io::Result<()> {
+    let args = Args::parse();
+
     // get the current working directory
     let mut current_path = current_dir()?;
     current_path.push(".ng");
@@ -46,68 +62,19 @@ async fn main() -> std::io::Result<()> {
     // that the current directory contains this demo image file
     let security_img = read("nextgraph/examples/wallet-security-image-demo.png")?;
 
-    // the peer_id should come from somewhere else.
-    // this is just given for the sake of an example
-    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
+    let peer_id_of_server_broker: PubKey = args.peer_id.as_str().try_into()
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, format!("Invalid peer ID: {}", e)))?;
     
-    let user_id: PubKey = "Rb8M-t5Jt_Ry9CEbcl0FS-rK9j3_K4LNlFR4SeGoGlQA".try_into().unwrap();
-
-    // Create your wallet
-    // this will take some time !
-    println!("Creating the wallet. this will take some time...");
-
-    let wallet_result = wallet_create_v0(CreateWalletV0 {
-        security_img,
-        security_txt: "know yourself".to_string(),
-        pin: [1, 2, 1, 2],
-        pazzle_length: 9,
-        send_bootstrap: false,
-        send_wallet: false,
-        result_with_wallet_file: true,
-        local_save: true,
-        // we default to localhost:14400. this is just for the sake of an example
-        core_bootstrap: BootstrapContentV0::new_localhost(peer_id_of_server_broker),
-        core_registration: None,
-        additional_bootstrap: None,
-        pdf: false,
-        device_name: "test".to_string(),
-    })
-    .await?;
-// let mut pathh="".resolve(
-//                 format!("wallet-{}.ngw", wallet_result.wallet_name),
-//                 BaseDirectory::Download,
-//             )
-//             .unwrap();
-    let file_path = "wallet.ngw";
-    let _r = write(file_path, &wallet_result.wallet_file);
-
-    // let _r2 = write("path.pdf", &wallet_result.pdf_file);
-        
-
+    let user_id: PubKey = args.user_id.as_str().try_into()
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, format!("Invalid user ID: {}", e)))?;
     
-    println!("Your wallet name is : {}", wallet_result.wallet_name);
+    println!("Using peer ID: {}", args.peer_id);
+    println!("Using user ID: {}", args.user_id);
+    println!("Using wallet: {}", args.wallet_name);
 
-    let pazzle = display_pazzle(&wallet_result.pazzle);
-    let mut pazzle_words = vec![];
-    println!("Your pazzle is: {:?}", wallet_result.pazzle);
-    for emoji in pazzle {
-        println!(
-            "\t{}:\t{}{}",
-            emoji.0,
-            if emoji.0.len() > 12 { "" } else { "\t" },
-            emoji.1
-        );
-        pazzle_words.push(emoji.1.to_string());
-    }
-    println!("Your mnemonic is:");
-    display_mnemonic(&wallet_result.mnemonic)
-        .iter()
-        .for_each(|word| print!("{} ", word.as_str()));
-    println!("");
+    let _session = session_start(SessionConfig::new_save(&user_id, &args.wallet_name)).await?;
+    println!("Session started successfully");
 
-    // A session has been opened for you and you can directly use it without the need to call [wallet_was_opened] nor [session_start].
-    let user_id = wallet_result.personal_identity();
-    println!("giris");
     // if the user has internet access, they can now decide to connect to its Server Broker, in order to sync data
     let status = user_connect(&user_id).await?;
     println!("çıkış");
@@ -127,60 +94,9 @@ async fn main() -> std::io::Result<()> {
     // Then we should disconnect
     user_disconnect(&user_id).await?;
 
-    // if you need the Wallet File again (if you didn't select `result_with_wallet_file` by example), you can retrieve it with:
-    let wallet_file = wallet_get_file(&wallet_result.wallet_name).await?;
-
-    // if you did ask for `result_with_wallet_file`, as we did above, then the 2 vectors should be identical
-    assert_eq!(wallet_file, wallet_result.wallet_file);
-
-    // stop the session
     session_stop(&user_id).await?;
 
-    // closes the wallet
-    wallet_close(&wallet_result.wallet_name).await?;
-
-    // as we have saved the wallet, the next time we want to connect,
-    // we can retrieve the wallet, display the security phrase and image to the user, ask for the pazzle or mnemonic, and then open the wallet
-    let _wallet = wallet_get(&wallet_result.wallet_name).await?;
-
-    // at this point, the wallet is kept in the internal memory of the LocalBroker
-    // and it hasn't been opened yet, so it is not usable right away.
-    // now let's open the wallet, by providing the pazzle and PIN code
-    let opened_wallet =
-        wallet_open_with_pazzle_words(&wallet_result.wallet, &pazzle_words, [1, 2, 1, 2])?;
-
-    // once the wallet is opened, we notify the LocalBroker that we have opened it.
-    let _client = wallet_was_opened(opened_wallet).await?;
-
-    // now that the wallet is opened, let's start a session.
-    // we pass the user_id and the wallet_name
-    let _session = session_start(SessionConfig::new_save(
-        &user_id,
-        &wallet_result.wallet_name,
-    ))
-    .await?;
-
-    // if the user has internet access, they can now decide to connect to its Server Broker, in order to sync data
-    let status = user_connect(&user_id).await?;
-
-    // The connection cannot succeed because we miss-configured the core_bootstrap of the wallet. its Peer ID is invalid.
-    let error_reason = status[0].3.as_ref().unwrap();
-    println!("ZZXerror_reasonXXXX: {:?}",error_reason);
-    // assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError");
-    println!("ZZXerror_reasonXXX çıktı");
-
-    // then you can make some calls to the APP protocol
-    // with app_request or app_request_stream
-    // more to be detailed soon.
-
-    // Then we should disconnect
-    user_disconnect(&user_id).await?;
-
-    // stop the session
-    session_stop(&user_id).await?;
-
-    // closes the wallet
-    wallet_close(&wallet_result.wallet_name).await?;
+    println!("Testing connection with existing user credentials...");
 
     Ok(())
 }

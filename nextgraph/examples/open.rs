@@ -9,6 +9,7 @@
 
 use std::env::current_dir;
 use std::fs::create_dir_all;
+use clap::Parser;
 
 #[allow(unused_imports)]
 use nextgraph::local_broker::{
@@ -19,8 +20,23 @@ use nextgraph::local_broker::{
 };
 use ng_repo::types::PubKey;
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, env = "NG_PEER_ID", default_value = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA")]
+    peer_id: String,
+
+    #[arg(short, long, env = "NG_USER_ID", default_value = "4yzJccQX0G6dyNrh7vGiiwD6FeOPCZBNy2ChFJsYe8oA")]
+    user_id: String,
+
+    #[arg(short, long, env = "NG_WALLET_NAME", default_value = "generated_user_wallet")]
+    wallet_name: String,
+}
+
 #[async_std::main]
 async fn main() -> std::io::Result<()> {
+    let args = Args::parse();
+
     // get the current working directory
     let mut current_path = current_dir()?;
     current_path.push(".ng");
@@ -33,16 +49,19 @@ async fn main() -> std::io::Result<()> {
     }))
     .await;
 
-    let user_id: PubKey = "GCY9-5bPrgpXaUySc-vNxHc58Qp6GsCnXZuR7AyNWJ4A".try_into().unwrap();
-    let wallet_name = "UU0TQrFHowwgU-61YfTJnr484V5w0jwL9tSEz3pmtNoA".to_string();
+    let user_id: PubKey = args.user_id.as_str().try_into()
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, format!("Invalid user ID: {}", e)))?;
 
-    // the peer_id should come from somewhere else.
-    // this is just given for the sake of an example
-    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
+    let peer_id_of_server_broker: PubKey = args.peer_id.as_str().try_into()
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, format!("Invalid peer ID: {}", e)))?;
+
+    println!("Using peer ID: {}", args.peer_id);
+    println!("Using user ID: {}", args.user_id);
+    println!("Using wallet: {}", args.wallet_name);
 
     // as we have previously saved the wallet,
     // we can retrieve it, display the security phrase and image to the user, ask for the pazzle or mnemonic, and then open the wallet
-    let wallet = wallet_get(&wallet_name).await?;
+    let wallet = wallet_get(&args.wallet_name).await?;
 
     // at this point, the wallet is kept in the internal memory of the LocalBroker
     // and it hasn't been opened yet, so it is not usable right away.
@@ -60,7 +79,7 @@ async fn main() -> std::io::Result<()> {
 
     // now that the wallet is opened, let's start a session.
     // we pass the user_id and the wallet_name
-    let _session = session_start(SessionConfig::new_save(&user_id, &wallet_name)).await?;
+    let _session = session_start(SessionConfig::new_save(&user_id, &args.wallet_name)).await?;
 
     // if the user has internet access, they can now decide to connect to its Server Broker, in order to sync data
     let status = user_connect(&user_id).await?;
@@ -77,7 +96,7 @@ async fn main() -> std::io::Result<()> {
     session_stop(&user_id).await?;
 
     // closes the wallet
-    wallet_close(&wallet_name).await?;
+    wallet_close(&args.wallet_name).await?;
 
     Ok(())
 }
