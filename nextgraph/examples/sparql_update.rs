@@ -30,25 +30,23 @@ async fn main() -> std::io::Result<()> {
     // all sessions will be lost when the program exits
     init_local_broker(Box::new(|| LocalBrokerConfig::InMemory)).await;
 
-    let wallet_file =
-        read("/Users/nl/Downloads/wallet-Hr-UITwGtjE1k6lXBoVGzD4FQMiDkM3T6bSeAi9PXt4A.ngw")
-            .expect("read wallet file");
+    let wallet_file = read("wallet.ngw").expect("read wallet file");
 
     let wallet = wallet_read_file(wallet_file).await?;
 
     let mnemonic_words = vec![
-        "jealous".to_string(),
-        "during".to_string(),
-        "elevator".to_string(),
-        "swallow".to_string(),
-        "pen".to_string(),
-        "phone".to_string(),
-        "like".to_string(),
-        "employ".to_string(),
-        "myth".to_string(),
-        "remember".to_string(),
-        "question".to_string(),
-        "lemon".to_string(),
+        "tribe".to_string(),
+        "outdoor".to_string(),
+        "illegal".to_string(),
+        "material".to_string(),
+        "endorse".to_string(),
+        "direct".to_string(),
+        "cream".to_string(),
+        "estate".to_string(),
+        "act".to_string(),
+        "segment".to_string(),
+        "valley".to_string(),
+        "chimney".to_string(),
     ];
 
     let opened_wallet = wallet_open_with_mnemonic_words(&wallet, &mnemonic_words, [2, 3, 2, 3])?;

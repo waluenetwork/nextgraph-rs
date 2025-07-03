@@ -11,8 +11,6 @@ use core::fmt;
 use std::collections::{BTreeMap, HashMap};
 use std::fs::{read, remove_file, write};
 use std::path::PathBuf;
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use base64::Engine;
 use ng_repo::types::PubKey;
 
 use async_once_cell::OnceCell;
@@ -2492,32 +2490,9 @@ pub async fn user_connect_with_device_info(
                     log_debug!("URL {:?}", url);
                     //Option<(String, Vec<BindAddress>)>
                     if url.is_some() {
-    println!("36");
                         let url = url.unwrap();
-    println!("37");
                         if url.1.is_empty() {
-    println!("38");
-    println!("38url.0.clone(): {:?}",url.0.clone());
-    // println!("38arc_cnx.clone(): {:?}",arc_cnx.clone());
-    println!("38apeer_key.clone(): {:?}",peer_key.clone());
-    println!("38apeer_id: {:?}",peer_id.to_string());
-    println!("38aserver_keyto_string: {:?}",server_key.to_string());
-    println!("38aserver_key: {:?}",server_key.to_hash_string());
-    println!("38aurl.0.clone(): {:?}",url.0.clone());
-    println!("38aclient_name.clone(): {:?}",client_name.clone());
-    println!("38auser_priv.clone(): {:?}",user_priv.clone());
-    println!("38aclient_priv.clone(): {:?}",client_priv.clone());
-    println!("38ainfo.clone(): {:?}",info.clone());
-    println!("38aSome(core.1): {:?}",Some(core.1));
-    let server_key_str = "_WFagTf0unHzR2kj3vLvvLakBNX7vel_Rus_GEDWT-oA";
-    // let server_key_bytes = URL_SAFE_NO_PAD
-    // .decode(server_key_str)
-    // .expect("Base64 decode failed");
-
-    // let server_key_m = PubKey(server_key_bytes);
-    let server_key_m: PubKey = (server_key_str).try_into().unwrap();
-    println!("38aserver_key_m: {:?}",server_key_m.to_hash_string());
-    println!("38aserver_key_m.to_string(): {:?}",server_key_m.to_string());
+                            let server_key_m = server_key;
 
                             // TODO deal with Box(Dyn)Public -> tunnel, and on tauri/forward/CLIs, deal with all Box -> direct connections (when url.1.len is > 0)
                             let res = BROKER
@@ -2538,9 +2513,7 @@ pub async fn user_connect_with_device_info(
                                     }),
                                 )
                                 .await;
-    println!("39 : {:?}", res);
                             log_debug!("broker.connect : {:?}", res);
-    println!("40");
 
                             tried = Some((
                                 user_id.clone(),
@@ -2552,11 +2525,8 @@ pub async fn user_connect_with_device_info(
                                 },
                                 get_unix_time(),
                             ));
-    println!("41");
                         }
-    println!("42");
                         if tried.is_some() && tried.as_ref().unwrap().3.is_none() {
-    println!("43");
                             let res = {
                                 let session = local_broker.get_session_mut(original_user_id)?;
                                 session.verifier.connection_opened(server_key).await

@@ -48,7 +48,7 @@ async fn main() -> std::io::Result<()> {
 
     // the peer_id should come from somewhere else.
     // this is just given for the sake of an example
-    let peer_id_of_server_broker = PubKey::nil();
+    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
 
     // Create your wallet
     // this will take some time !
@@ -76,12 +76,7 @@ async fn main() -> std::io::Result<()> {
 //                 BaseDirectory::Download,
 //             )
 //             .unwrap();
-    let file_path = "/home/mustafa/WORKDIR/NEXTGRAPH/patronversion4/nextgraph-rs/nextgraph/examples/wallet.ngw";
-
-    // Ana klasörü al
-    if let Some(parent_dir) = Path::new(file_path).parent() {
-        fs::create_dir_all(parent_dir)?; // klasörleri oluştur (varsa dokunmaz)
-    }
+    let file_path = "wallet.ngw";
     let _r = write(file_path, &wallet_result.wallet_file);
 
     // let _r2 = write("path.pdf", &wallet_result.pdf_file);
@@ -117,7 +112,7 @@ async fn main() -> std::io::Result<()> {
 
     // The connection cannot succeed because we miss-configured the core_bootstrap of the wallet. its Peer ID is invalid.
     let error_reason = status[0].3.as_ref().unwrap();
-    assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError");
+    assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError" || error_reason == "InvitationRequired" || error_reason == "AccessDenied");
 
     // a session ID has been assigned to you in `wallet_result.session_id` you can use it to fetch a document
     //let _ = doc_fetch(wallet_result.session_id, "ng:example".to_string(), None).await?;

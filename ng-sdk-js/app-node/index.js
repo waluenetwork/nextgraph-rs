@@ -25,7 +25,7 @@ global.WebSocket = WebSocket;
 const fs = require('fs');
 // let buffer = fs.readFileSync("/home/mustafa/WORKDIR/NEXTGRAPH/patronversion4/nextgraph-rs/nextgraph/examples/wallet.ngw");
 
-let buffer = fs.readFileSync("/home/mustafa/Downloads/wallet-LQlOq03_O-mLhStjYHfXV52WPBatYRChRri4KnDZB4sA.ngw");
+let buffer = fs.readFileSync("../../wallet.ngw");
 
 ng.wallet_read_file(buffer).then(async (wallet)=>{
     console.log("start");
@@ -39,8 +39,8 @@ ng.wallet_read_file(buffer).then(async (wallet)=>{
         //     [1, 2, 1, 2]);
 
         let opened_wallet = await ng.wallet_open_with_mnemonic_words(wallet, [
-            "tilt", "soup", "pledge", "flat", "adult", "skirt", "blouse", "spot", "evoke", "truly", "oppose", "power" ],
-            [1, 2, 1, 2]);
+            "tribe", "outdoor", "illegal", "material", "endorse", "direct", "cream", "estate", "act", "segment", "valley", "chimney" ],
+            [2, 3, 2, 3]);
 
         let user_id = opened_wallet.V0.personal_site;
         let user_id_string = opened_wallet.V0.personal_site_id;

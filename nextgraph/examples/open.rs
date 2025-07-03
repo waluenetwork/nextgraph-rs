@@ -17,6 +17,7 @@ use nextgraph::local_broker::{
     wallet_open_with_pazzle, wallet_open_with_pazzle_words, wallet_read_file, wallet_was_opened,
     LocalBrokerConfig, SessionConfig,
 };
+use ng_repo::types::PubKey;
 
 #[async_std::main]
 async fn main() -> std::io::Result<()> {
@@ -32,7 +33,11 @@ async fn main() -> std::io::Result<()> {
     }))
     .await;
 
-    let wallet_name = "mDr__lhRJWqnLj93ywwVS16kj8AuqSVf3H2goZUFSp8A".to_string();
+    let wallet_name = "kbpDosKhaNMA0qLVG46rLr2lw4WooSP2AEa3Gio5kMQA".to_string();
+
+    // the peer_id should come from somewhere else.
+    // this is just given for the sake of an example
+    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
 
     // as we have previously saved the wallet,
     // we can retrieve it, display the security phrase and image to the user, ask for the pazzle or mnemonic, and then open the wallet
@@ -43,7 +48,7 @@ async fn main() -> std::io::Result<()> {
     // now let's open the wallet, by providing the pazzle and PIN code
     let opened_wallet = wallet_open_with_pazzle(
         &wallet,
-        vec![64, 107, 81, 59, 126, 2, 36, 137, 18],
+        vec![108, 141, 32, 89, 17, 122, 5, 59, 70],
         [1, 2, 1, 2],
     )?;
 
@@ -60,8 +65,9 @@ async fn main() -> std::io::Result<()> {
     let status = user_connect(&user_id).await?;
 
     // The connection cannot succeed because we miss-configured the core_bootstrap of the wallet. its Peer ID is invalid.
+    let error_reason = status[0].3.as_ref().unwrap();
+    assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError" || error_reason == "InvitationRequired" || error_reason == "AccessDenied");
     println!("Connection was : {:?}", status[0]);
-    //assert!(error_reason == "NoiseHandshakeFailed" || error_reason == "ConnectionError");
 
     // Then we should disconnect
     user_disconnect(&user_id).await?;

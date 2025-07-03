@@ -303,7 +303,10 @@ impl Broker {
                     {
                         let mut storage = lock.write().await;
                         if storage.has_no_user()? {
-                            let code = user_and_registration.1.unwrap().unwrap();
+                            let code = match user_and_registration.1.unwrap() {
+                                Some(code) => code,
+                                None => return Err(ProtocolError::InvitationRequired),
+                            };
                             let inv_type = storage.get_invitation_type(code)?;
                             if inv_type == 3u8 {
                                 // it is a setup invite
@@ -329,7 +332,10 @@ impl Broker {
                                 if user_and_registration.1.unwrap().is_none() {
                                     Err(ProtocolError::InvitationRequired)
                                 } else {
-                                    let code = user_and_registration.1.unwrap().unwrap();
+                                    let code = match user_and_registration.1.unwrap() {
+                                        Some(code) => code,
+                                        None => return Err(ProtocolError::InvitationRequired),
+                                    };
                                     let inv_type = storage.get_invitation_type(code)?;
                                     storage.add_user(user_and_registration.0, inv_type == 2u8)?;
                                     storage.remove_invitation(code)?;
