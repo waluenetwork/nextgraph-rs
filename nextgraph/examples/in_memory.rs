@@ -36,7 +36,7 @@ async fn main() -> std::io::Result<()> {
     // the peer_id should come from somewhere else.
     // this is just given for the sake of an example
     #[allow(deprecated)]
-    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
+    let peer_id_of_server_broker: PubKey = "0M2-O3MjH13eaanBrw_Az8SsT90AUOWlwSBA__CLsTcA".try_into().unwrap();
 
     // Create your wallet
     // this will take some time !

@@ -37,7 +37,7 @@ async fn main() -> std::io::Result<()> {
 
     // the peer_id should come from somewhere else.
     // this is just given for the sake of an example
-    let peer_id_of_server_broker: PubKey = "s2YM98jAU80Eo_l43GDnDDH33fmHc3FpE2GdCJyo5hYA".try_into().unwrap();
+    let peer_id_of_server_broker: PubKey = "0M2-O3MjH13eaanBrw_Az8SsT90AUOWlwSBA__CLsTcA".try_into().unwrap();
 
     // as we have previously saved the wallet,
     // we can retrieve it, display the security phrase and image to the user, ask for the pazzle or mnemonic, and then open the wallet
